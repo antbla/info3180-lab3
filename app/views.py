@@ -2,12 +2,13 @@
 Flask Documentation:     http://flask.pocoo.org/docs/
 Jinja2 Documentation:    http://jinja.pocoo.org/2/documentation/
 Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
-
 This file creates your application.
 """
 
 from app import app
-from flask import render_template, request, redirect, url_for
+from flask import render_template, flash, request, redirect, url_for
+#app.secret_key = 'akunamatata'
+
 
 
 ###
@@ -18,8 +19,54 @@ from flask import render_template, request, redirect, url_for
 def home():
     """Render website's home page."""
     return render_template('home.html')
+  
+
+@app.route('/contact',methods=['POST', 'GET']) 
+def contact():
+  #flash = 'Message successfully sent'
+  if request.method == 'POST':
+    fromaddr = request.form['email'] 
+    fromname = request.form['name']
+    toaddr  = 'anthoneyblanco@gmail.com'
+    toname = 'Anthoney Whyte'
+    subject = request.form['subject']
+    msg = request.form['message']
+
+    message = """From: {} <{}> 
+    To: {} <{}> 
+    Subject: {} 
+     {} 
+    """
+    messagetosend = message.format(
+                                 fromname,
+                                 fromaddr,
+                                 toname,
+                                 toaddr,
+                                 subject,
+                                 msg)
+    
+    
+    sendemail(fromaddr, toaddr, messagetosend)
+    
+  return render_template('contact.html')
 
 
+def sendemail(faddr, taddr, msend):
+  
+  import smtplib
+  #Credentials (if needed)
+  username = 'anthoneyblanco@gmail.com'
+  password = 'zrcxgyvpnbnkptcx'
+
+  # The actual mail send
+  server = smtplib.SMTP('smtp.gmail.com:587')
+  server.starttls()
+  server.login(username,password)
+  server.sendmail(faddr, taddr, subject,msg)
+  server.quit()
+
+  
+  
 @app.route('/about/')
 def about():
     """Render the website's about page."""
@@ -53,6 +100,5 @@ def page_not_found(error):
     """Custom 404 page."""
     return render_template('404.html'), 404
 
-
 if __name__ == '__main__':
-    app.run(debug=True,host="0.0.0.0",port="8888")
+    app.run(debug=True,host="0.0.0.0",port="8080")
